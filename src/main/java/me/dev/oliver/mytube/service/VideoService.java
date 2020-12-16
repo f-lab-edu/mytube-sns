@@ -36,16 +36,9 @@ public class VideoService {
    * amazon s3에 동영상 업로드 및 file size는 byte 단위로 저장됨, 동영상 컨텐츠 내의 세부사항 기록 db에 저장.
    *
    * @param multipartFile  게시물 관련 정보를 담은 객체
-   * @param userId         회원 아이디
-   * @param title          동영상 제목
-   * @param detailContents 동영상에 대한 세부 내용
    */
-  @Transactional
   @LoginValidation
-  public void uploadVideo(MultipartFile multipartFile,
-      String userId,
-      String title,
-      String detailContents) {
+  public void uploadVideo(MultipartFile multipartFile) {
 
     String fileName = multipartFile.getOriginalFilename();
 
@@ -59,18 +52,25 @@ public class VideoService {
       long fileSize = multipartFile.getSize();
 
       VideoUploadDto videoUploadDto = VideoUploadDto.builder()
-          .userId(userId)
-          .title(title)
-          .detailContents(detailContents)
           .fileUrl(fileUrl)
           .fileSize(fileSize)
           .build();
       videoMapper.insertVideo(videoUploadDto);
-      videoMapper.insertDetailInfo(videoUploadDto);
     } catch (RuntimeException e) {
       log.error("uploadVideo 메서드에서 {} file 처리 중 에러가 발생했습니다. s3 활성화 유무와 관련 정보를 확인하십시오", fileName, e);
       throw new IllegalStateException("서버에서 파일 처리중 예상치 못한 에러가 발생했습니다");
     }
+  }
+
+  /**
+   * 동영상 파일과 관련된 세부 정보를 업로드.
+   *
+   * @param videoUploadDto userId, title, detailContents를 받아옴.
+   */
+  @LoginValidation
+  public void uploadDetailInfo(VideoUploadDto videoUploadDto) {
+
+    videoMapper.insertDetailInfo(videoUploadDto);
   }
 
   /**

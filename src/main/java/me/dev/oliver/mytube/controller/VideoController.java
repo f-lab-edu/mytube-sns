@@ -1,13 +1,11 @@
 package me.dev.oliver.mytube.controller;
 
-import java.io.IOException;
 import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.dev.oliver.mytube.dto.VideoLikeDto;
+import me.dev.oliver.mytube.dto.VideoUploadDto;
 import me.dev.oliver.mytube.dto.VideoWatchDto;
 import me.dev.oliver.mytube.service.VideoService;
-import org.apache.ibatis.annotations.Delete;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,17 +23,27 @@ public class VideoController {
   private final VideoService videoService;
 
   /**
-   * 동영상 및 세부 사항 업로드
+   * 동영상 업로드
+   * 주의) uploadVideoInfo 메서드와 같이 사용해야함.
    *
-   * @param multipartFile 동영상 파일을 및 userId, title, detail contents를 받아옴
+   * @param multipartFile 동영상 파일을 및 userId, title, detail contents를 받아옴.
    */
   @PostMapping
-  public void uploadVideo(@RequestParam("fileVideo") MultipartFile multipartFile,
-      @Valid @RequestParam String userId,
-      @Valid @RequestParam String title,
-      @Valid @RequestParam String detailContents) throws IOException {
+  public void uploadVideo(@RequestParam("fileVideo") MultipartFile multipartFile) {
 
-    videoService.uploadVideo(multipartFile, userId, title, detailContents);
+    videoService.uploadVideo(multipartFile);
+  }
+
+  /**
+   * 동영상에 필요한 정보들을 업로드.
+   * 주의) uploadVideo 메서드와 같이 사용해야함.
+   *
+   * @param videoUploadDto userId, title, detailContents를 받아옴.
+   */
+  @PostMapping("infos")
+  public void uploadVideoInfo(@Valid @RequestBody VideoUploadDto videoUploadDto) {
+
+    videoService.uploadDetailInfo(videoUploadDto);
   }
 
   /**
